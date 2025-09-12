@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskMaster Pro - Gestión de Tareas</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --success: #48bb78;
+            --warning: #ed8936;
+            --danger: #f56565;
+            --dark: #1a202c;
+            --gray-100: #f7fafc;
+            --gray-200: #edf2f7;
+            --gray-300: #e2e8f0;
+            --gray-400: #cbd5e0;
+            --gray-600: #718096;
+            --gray-700: #4a5568;
+            --gray-800: #2d3748;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            color: var(--gray-800);
+        }
+
+        .container {
+            max-width: 3000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--white);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .stats-panel {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .stats-panel h3 {
+            margin-bottom: 20px;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .main-panel {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-secondary {
+            background: var(--gray-600);
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--gray-300);
+            background: var(--white);
+            color: var(--gray-700);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        .tasks-container {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            background: var(--gray-100);
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            animation: slideIn 0.3s ease;
+        }
+
+        .task-item:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .task-item.completed {
+            opacity: 0.7;
+            background: var(--gray-200);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .task-title {
+            flex: 1;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-right: 15px;
+        }
+
+        .task-item.completed .task-title {
+            text-decoration: line-through;
+            color: var(--gray-600);
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+
+        .priority {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority-alta {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .priority-media {
+            background: var(--warning);
+            color: var(--white);
+        }
+
+        .priority-baja {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray-600);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray-600);
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: var(--white);
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: var(--success);
+        }
+
+        .notification.error {
+            background: var(--danger);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .filters {
+                justify-content: center;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-tasks"></i> TaskMaster Pro</h1>
+            <p>Gestiona tus tareas de manera eficiente y profesional</p>
+        </header>
+
+        <div class="dashboard">
+            <div class="stats-panel">
+                <h3><i class="fas fa-chart-pie"></i> Estadísticas</h3>
+                <div id="stats">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Aqui veras tus estadísticas...
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-panel">
+                <div class="controls">
+                    <div class="input-group">
+                        <input type="text" id="taskInput" class="form-control" placeholder="¿Qué necesitas hacer?" maxlength="200">
+                    </div>
+                    <select id="prioritySelect" class="form-control" style="flex: none; width: 120px;">
+                        <option value="baja">Baja</option>
+                        <option value="media" selected>Media</option>
+                        <option value="alta">Alta</option>
+                    </select>
+                    <button id="addTaskBtn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Agregar
+                    </button>
+                </div>
+
+                <div class="controls">
+                    <div class="input-group">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Buscar tareas...">
+                    </div>
+                </div>
+
+                <div class="filters">
+                    <button class="filter-btn active" data-filter="todas">
+                        <i class="fas fa-list"></i> Todas
+                    </button>
+                    <button class="filter-btn" data-filter="pendientes">
+                        <i class="fas fa-clock"></i> Pendientes
+                    </button>
+                    <button class="filter-btn" data-filter="completadas">
+                        <i class="fas fa-check"></i> Completadas
+                    </button>
+                    <button class="filter-btn" data-filter="alta">
+                        <i class="fas fa-exclamation-triangle"></i> Alta Prioridad
+                    </button>
+                </div>
+
+                <div id="tasksContainer" class="tasks-container">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Aqui veras tus tareas...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class TaskManager {
+            constructor() {
+                this.tasks = [];
+                this.currentFilter = 'todas';
+                this.searchTerm = '';
+                this.init();
+            }
+
+            async init() {
+                this.bindEvents();
+                await this.loadTasks();
+                await this.loadStats();
+            }
+
+            bindEvents() {
+                // Agregar tarea
+                document.getElementById('addTaskBtn').addEventListener('click', () => this.addTask());
+                document.getElementById('taskInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.addTask();
+                });
+
+                // Filtros
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.currentFilter = btn.dataset.filter;
+                        this.renderTasks();
+                    });
+                });
+
+                // Búsqueda
+                document.getElementById('searchInput').addEventListener('input', (e) => {
+                    this.searchTerm = e.target.value.toLowerCase();
+                    this.renderTasks();
+                });
+            }
+
+            async makeRequest(url, options = {}) {
+                try {
+                    const response = await fetch(`http://localhost:5000${url}`, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...options.headers
+                        },
+                        ...options
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error('Request failed:', error);
+                    this.showNotification('Error de conexión con el servidor', 'error');
+                    throw error;
+                }
+            }
+
+            async loadTasks() {
+                try {
+                    this.tasks = await this.makeRequest('/api/tareas');
+                    this.renderTasks();
+                } catch (error) {
+                    document.getElementById('tasksContainer').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Error al cargar las tareas</h3>
+                            <p>Verifica que el servidor esté ejecutándose</p>
+                        </div>
+                    `;
+                }
+            }
+
+            async loadStats() {
+                try {
+                    const stats = await this.makeRequest('/api/estadisticas');
+                    this.renderStats(stats);
+                } catch (error) {
+                    document.getElementById('stats').innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>Error al cargar estadísticas</p>
+                        </div>
+                    `;
+                }
+            }
+
+            renderStats(stats) {
+                document.getElementById('stats').innerHTML = `
+                    <div class="stat-item">
+                        <div class="stat-label">
+                            <i class="fas fa-list" style="color: var(--primary);"></i>
+                            Total de tareas
+                        </div>
+                        <div class="stat-value">${stats.total}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            Completadas
+                        </div>
+                        <div class="stat-value">${stats.completadas}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">
+                            <i class="fas fa-clock" style="color: var(--warning);"></i>
+                            Pendientes
+                        </div>
+                        <div class="stat-value">${stats.pendientes}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">
+                            <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+                            Alta prioridad
+                        </div>
+                        <div class="stat-value">${stats.prioridades.alta}</div>
+                    </div>
+                `;
+            }
+
+            renderTasks() {
+                const filteredTasks = this.filterTasks();
+                const container = document.getElementById('tasksContainer');
+
+                if (filteredTasks.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <h3>No hay tareas</h3>
+                            <p>${this.searchTerm ? 'No se encontraron tareas con ese criterio' : 'Agrega tu primera tarea para comenzar'}</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = filteredTasks.map(task => `
+                    <div class="task-item ${task.completada ? 'completed' : ''}">
+                        <div class="task-header">
+                            <div class="task-title">${this.escapeHtml(task.descripcion)}</div>
+                            <div class="task-actions">
+                                ${!task.completada ? `
+                                    <button class="btn btn-success" onclick="taskManager.completeTask(${task.id})" title="Completar tarea">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                ` : ''}
+                                <button class="btn btn-danger" onclick="taskManager.deleteTask(${task.id})" title="Eliminar tarea">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="task-meta">
+                            <div>
+                                <span class="priority priority-${task.prioridad}">${task.prioridad}</span>
+                                <span style="margin-left: 10px;">
+                                    <i class="fas fa-calendar"></i> ${this.formatDate(task.fecha_creacion)}
+                                </span>
+                                ${task.fecha_completacion ? `
+                                    <span style="margin-left: 10px;">
+                                        <i class="fas fa-check-circle"></i> ${this.formatDate(task.fecha_completacion)}
+                                    </span>
+                                ` : ''}
+                            </div>
+                            <div>ID: ${task.id}</div>
+                        </div>
+                    </div>
+                 `).join('');
+            }
+
+            filterTasks() {
+                let filtered = this.tasks;
+
+                // Filtro por estado/prioridad
+                switch (this.currentFilter) {
+                    case 'pendientes':
+                        filtered = filtered.filter(task => !task.completada);
+                        break;
+                    case 'completadas':
+                        filtered = filtered.filter(task => task.completada);
+                        break;
+                    case 'alta':
+                        filtered = filtered.filter(task => task.prioridad === 'alta' && !task.completada);
+                        break;
+                }
+
+                // Filtro por búsqueda
+                if (this.searchTerm) {
+                    filtered = filtered.filter(task => 
+                        task.descripcion.toLowerCase().includes(this.searchTerm)
+                    );
+                }
+
+                // Ordenar por prioridad y fecha
+                return filtered.sort((a, b) => {
+                    const priorityOrder = { 'alta': 3, 'media': 2, 'baja': 1 };
+                    if (a.completada !== b.completada) {
+                        return a.completada - b.completada;
+                    }
+                    if (priorityOrder[a.prioridad] !== priorityOrder[b.prioridad]) {
+                        return priorityOrder[b.prioridad] - priorityOrder[a.prioridad];
+                    }
+                    return new Date(b.fecha_creacion) - new Date(a.fecha_creacion);
+                });
+            }
+
+            async addTask() {
+                const input = document.getElementById('taskInput');
+                const priority = document.getElementById('prioritySelect').value;
+                const description = input.value.trim();
+
+                if (!description) {
+                    this.showNotification('Por favor ingresa una descripción para la tarea', 'error');
+                    return;
+                }
+
+                try {
+                    await this.makeRequest('/api/tareas', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            descripcion: description,
+                            prioridad: priority
+                        })
+                    });
+
+                    input.value = '';
+                    this.showNotification('Tarea agregada correctamente', 'success');
+                    await this.loadTasks();
+                    await this.loadStats();
+                } catch (error) {
+                    this.showNotification('Error al agregar la tarea', 'error');
+                }
+            }
+
+            async completeTask(id) {
+                try {
+                    await this.makeRequest(`/api/tareas/${id}`, {
+                        method: 'PUT'
+                    });
+                    
+                    this.showNotification('Tarea completada', 'success');
+                    await this.loadTasks();
+                    await this.loadStats();
+                } catch (error) {
+                    this.showNotification('Error al completar la tarea', 'error');
+                }
+            }
+
+            async deleteTask(id) {
+                if (!confirm('¿Estás seguro de que deseas eliminar esta tarea?')) {
+                    return;
+                }
+
+                try {
+                    await this.makeRequest(`/api/tareas/${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    this.showNotification('Tarea eliminada', 'success');
+                    await this.loadTasks();
+                    await this.loadStats();
+                } catch (error) {
+                    this.showNotification('Error al eliminar la tarea', 'error');
+                }
+            }
+
+            showNotification(message, type = 'success') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                    ${message}
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => notification.classList.add('show'), 100);
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => document.body.removeChild(notification), 300);
+                }, 3000);
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        }
+
+        // Inicializar la aplicación
+        const taskManager = new TaskManager();
