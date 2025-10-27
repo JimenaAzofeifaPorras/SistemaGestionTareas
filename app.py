@@ -1,166 +1,437 @@
-# -*- coding: utf-8 -*-
-import json
+from flask import Flask, render_template_string
 import os
-from datetime import datetime
-from flask import Flask, jsonify, request, render_template
-from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Permite conexiones desde el frontend
 
-class GestorTareas:
-    def __init__(self, archivo_datos='tareas.json'):
-        self.archivo_datos = archivo_datos
-        self.tareas = self.cargar_tareas()
-    
-    def cargar_tareas(self):
-        """Carga las tareas desde el archivo JSON"""
-        if os.path.exists(self.archivo_datos):
-            try:
-                with open(self.archivo_datos, 'r', encoding='utf-8') as archivo:
-                    return json.load(archivo)
-            except (json.JSONDecodeError, FileNotFoundError):
-                return []
-        return []
-    
-    def guardar_tareas(self):
-        """Guarda las tareas en el archivo JSON"""
-        with open(self.archivo_datos, 'w', encoding='utf-8') as archivo:
-            json.dump(self.tareas, archivo, indent=2, ensure_ascii=False)
-    
-    def agregar_tarea(self, descripcion, prioridad='media'):
-        """Agrega una nueva tarea"""
-        # Encontrar el próximo ID disponible
-        max_id = max([t['id'] for t in self.tareas], default=0)
-        tarea = {
-            'id': max_id + 1,
-            'descripcion': descripcion,
-            'completada': False,
-            'prioridad': prioridad,
-            'fecha_creacion': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        }
-        self.tareas.append(tarea)
-        self.guardar_tareas()
-        return tarea
-    
-    def obtener_tareas(self, solo_pendientes=False):
-        """Obtiene todas las tareas o solo las pendientes"""
-        if solo_pendientes:
-            return [t for t in self.tareas if not t['completada']]
-        return self.tareas
-    
-    def completar_tarea(self, id_tarea):
-        """Marca una tarea como completada"""
-        for tarea in self.tareas:
-            if tarea['id'] == id_tarea:
-                if not tarea['completada']:
-                    tarea['completada'] = True
-                    tarea['fecha_completacion'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    self.guardar_tareas()
-                return tarea
-        return None
-    
-    def eliminar_tarea(self, id_tarea):
-        """Elimina una tarea"""
-        for i, tarea in enumerate(self.tareas):
-            if tarea['id'] == id_tarea:
-                tarea_eliminada = self.tareas.pop(i)
-                self.guardar_tareas()
-                return tarea_eliminada
-        return None
-    
-    def buscar_tareas(self, termino):
-        """Busca tareas por descripción"""
-        return [t for t in self.tareas if termino.lower() in t['descripcion'].lower()]
-    
-    def obtener_estadisticas(self):
-        """Obtiene estadísticas de las tareas"""
-        total = len(self.tareas)
-        completadas = len([t for t in self.tareas if t['completada']])
-        pendientes = total - completadas
-        
-        prioridades = {'alta': 0, 'media': 0, 'baja': 0}
-        for tarea in self.tareas:
-            if not tarea['completada']:
-                prioridades[tarea['prioridad']] += 1
-        
-        return {
-            'total': total,
-            'completadas': completadas,
-            'pendientes': pendientes,
-            'prioridades': prioridades
+# HTML de la aplicación
+HTML_CONTENT = '''<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Tareas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-# Instancia global del gestor
-gestor = GestorTareas()
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
-# Rutas de la API
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .secondary-btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            margin-top: 10px;
+        }
+
+        .task-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .task-input-group input {
+            flex: 1;
+        }
+
+        .task-input-group button {
+            width: auto;
+            padding: 12px 24px;
+        }
+
+        .tasks-list {
+            margin-top: 20px;
+        }
+
+        .task-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .task-item:hover {
+            transform: translateX(5px);
+        }
+
+        .task-item.completed {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        .task-text {
+            flex: 1;
+            color: #333;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .task-actions button {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+        }
+
+        .complete-btn {
+            background: #27ae60;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .user-info {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            width: auto;
+            padding: 8px 20px;
+            font-size: 14px;
+            background: #e74c3c;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .success {
+            color: #27ae60;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Pantalla de Login -->
+        <div id="loginScreen">
+            <h1>🔐 Iniciar Sesión</h1>
+            <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" placeholder="tu@email.com">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Contraseña</label>
+                <input type="password" id="loginPassword" placeholder="••••••••">
+            </div>
+            <button onclick="login()">Iniciar Sesión</button>
+            <button class="secondary-btn" onclick="showRegister()">Crear Cuenta</button>
+            <div id="loginError" class="error"></div>
+        </div>
+
+        <!-- Pantalla de Registro -->
+        <div id="registerScreen" class="hidden">
+            <h1>📝 Crear Cuenta</h1>
+            <div class="form-group">
+                <label for="registerName">Nombre</label>
+                <input type="text" id="registerName" placeholder="Tu nombre">
+            </div>
+            <div class="form-group">
+                <label for="registerEmail">Email</label>
+                <input type="email" id="registerEmail" placeholder="tu@email.com">
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">Contraseña</label>
+                <input type="password" id="registerPassword" placeholder="••••••••">
+            </div>
+            <button onclick="register()">Registrarse</button>
+            <button class="secondary-btn" onclick="showLogin()">Ya tengo cuenta</button>
+            <div id="registerError" class="error"></div>
+            <div id="registerSuccess" class="success"></div>
+        </div>
+
+        <!-- Pantalla de Tareas -->
+        <div id="tasksScreen" class="hidden">
+            <div class="header">
+                <div>
+                    <h1>✅ Mis Tareas</h1>
+                    <div class="user-info" id="userInfo"></div>
+                </div>
+                <button class="logout-btn" onclick="logout()">Salir</button>
+            </div>
+
+            <div class="task-input-group">
+                <input type="text" id="taskInput" placeholder="Nueva tarea..." onkeypress="if(event.key==='Enter') addTask()">
+                <button onclick="addTask()">Agregar</button>
+            </div>
+
+            <div class="tasks-list" id="tasksList"></div>
+        </div>
+    </div>
+
+    <script>
+        let users = {};
+        let currentUser = null;
+        let tasks = {};
+
+        function loadData() {
+            const savedUsers = localStorage.getItem('users');
+            const savedTasks = localStorage.getItem('tasks');
+            if (savedUsers) users = JSON.parse(savedUsers);
+            if (savedTasks) tasks = JSON.parse(savedTasks);
+        }
+
+        function saveData() {
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        loadData();
+
+        function showLogin() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('registerScreen').classList.add('hidden');
+            document.getElementById('tasksScreen').classList.add('hidden');
+            clearErrors();
+        }
+
+        function showRegister() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('registerScreen').classList.remove('hidden');
+            document.getElementById('tasksScreen').classList.add('hidden');
+            clearErrors();
+        }
+
+        function showTasks() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('registerScreen').classList.add('hidden');
+            document.getElementById('tasksScreen').classList.remove('hidden');
+            document.getElementById('userInfo').textContent = `Hola, ${currentUser.name}`;
+            renderTasks();
+        }
+
+        function clearErrors() {
+            document.getElementById('loginError').textContent = '';
+            document.getElementById('registerError').textContent = '';
+            document.getElementById('registerSuccess').textContent = '';
+        }
+
+        function register() {
+            const name = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim().toLowerCase();
+            const password = document.getElementById('registerPassword').value;
+
+            if (!name || !email || !password) {
+                document.getElementById('registerError').textContent = 'Todos los campos son obligatorios';
+                return;
+            }
+
+            if (users[email]) {
+                document.getElementById('registerError').textContent = 'Este email ya está registrado';
+                return;
+            }
+
+            users[email] = { name, password };
+            tasks[email] = [];
+            saveData();
+
+            document.getElementById('registerSuccess').textContent = '¡Cuenta creada! Redirigiendo...';
+            document.getElementById('registerError').textContent = '';
+            
+            setTimeout(() => {
+                document.getElementById('registerName').value = '';
+                document.getElementById('registerEmail').value = '';
+                document.getElementById('registerPassword').value = '';
+                showLogin();
+            }, 1500);
+        }
+
+        function login() {
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                document.getElementById('loginError').textContent = 'Por favor completa todos los campos';
+                return;
+            }
+
+            if (!users[email] || users[email].password !== password) {
+                document.getElementById('loginError').textContent = 'Email o contraseña incorrectos';
+                return;
+            }
+
+            currentUser = { email, name: users[email].name };
+            showTasks();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            showLogin();
+        }
+
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const taskText = taskInput.value.trim();
+
+            if (!taskText) return;
+
+            if (!tasks[currentUser.email]) {
+                tasks[currentUser.email] = [];
+            }
+
+            tasks[currentUser.email].push({
+                id: Date.now(),
+                text: taskText,
+                completed: false
+            });
+
+            saveData();
+            taskInput.value = '';
+            renderTasks();
+        }
+
+        function toggleTask(id) {
+            const userTasks = tasks[currentUser.email];
+            const task = userTasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                saveData();
+                renderTasks();
+            }
+        }
+
+        function deleteTask(id) {
+            tasks[currentUser.email] = tasks[currentUser.email].filter(t => t.id !== id);
+            saveData();
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const tasksList = document.getElementById('tasksList');
+            const userTasks = tasks[currentUser.email] || [];
+
+            if (userTasks.length === 0) {
+                tasksList.innerHTML = '<div class="empty-state">No tienes tareas. ¡Agrega una para comenzar!</div>';
+                return;
+            }
+
+            tasksList.innerHTML = userTasks.map(task => `
+                <div class="task-item ${task.completed ? 'completed' : ''}">
+                    <div class="task-text">${task.text}</div>
+                    <div class="task-actions">
+                        <button class="complete-btn" onclick="toggleTask(${task.id})">
+                            ${task.completed ? '↩️' : '✓'}
+                        </button>
+                        <button class="delete-btn" onclick="deleteTask(${task.id})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>'''
+
 @app.route('/')
 def index():
-    """Sirve el frontend"""
-    return render_template('index.html')
-
-@app.route('/api/tareas', methods=['GET'])
-def obtener_tareas():
-    """Obtiene todas las tareas"""
-    solo_pendientes = request.args.get('pendientes') == 'true'
-    tareas = gestor.obtener_tareas(solo_pendientes)
-    return jsonify(tareas)
-
-@app.route('/api/tareas', methods=['POST'])
-def crear_tarea():
-    """Crea una nueva tarea"""
-    data = request.get_json()
-    if not data or 'descripcion' not in data:
-        return jsonify({'error': 'Descripción requerida'}), 400
-    
-    descripcion = data['descripcion'].strip()
-    prioridad = data.get('prioridad', 'media')
-    
-    if not descripcion:
-        return jsonify({'error': 'La descripción no puede estar vacía'}), 400
-    
-    if prioridad not in ['alta', 'media', 'baja']:
-        prioridad = 'media'
-    
-    tarea = gestor.agregar_tarea(descripcion, prioridad)
-    return jsonify(tarea), 201
-
-@app.route('/api/tareas/<int:id_tarea>', methods=['PUT'])
-def completar_tarea(id_tarea):
-    """Completa una tarea"""
-    tarea = gestor.completar_tarea(id_tarea)
-    if tarea:
-        return jsonify(tarea)
-    return jsonify({'error': 'Tarea no encontrada'}), 404
-
-@app.route('/api/tareas/<int:id_tarea>', methods=['DELETE'])
-def eliminar_tarea(id_tarea):
-    """Elimina una tarea"""
-    tarea = gestor.eliminar_tarea(id_tarea)
-    if tarea:
-        return jsonify({'mensaje': 'Tarea eliminada correctamente'})
-    return jsonify({'error': 'Tarea no encontrada'}), 404
-
-@app.route('/api/buscar')
-def buscar_tareas():
-    """Busca tareas"""
-    termino = request.args.get('q', '').strip()
-    if not termino:
-        return jsonify({'error': 'Término de búsqueda requerido'}), 400
-    
-    resultados = gestor.buscar_tareas(termino)
-    return jsonify(resultados)
-
-@app.route('/api/estadisticas')
-def obtener_estadisticas():
-    """Obtiene estadísticas de las tareas"""
-    stats = gestor.obtener_estadisticas()
-    return jsonify(stats)
+    return render_template_string(HTML_CONTENT)
 
 if __name__ == '__main__':
-    # Crear directorio templates si no existe
-    if not os.path.exists('templates'):
-        os.makedirs('templates')
-
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)

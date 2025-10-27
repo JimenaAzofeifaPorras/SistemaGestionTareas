@@ -3,28 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskMaster Pro - Gestión de Tareas</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <title>Gestor de Tareas</title>
     <style>
-        :root {
-            --primary: #667eea;
-            --primary-dark: #5a67d8;
-            --secondary: #764ba2;
-            --accent: #f093fb;
-            --success: #48bb78;
-            --warning: #ed8936;
-            --danger: #f56565;
-            --dark: #1a202c;
-            --gray-100: #f7fafc;
-            --gray-200: #edf2f7;
-            --gray-300: #e2e8f0;
-            --gray-400: #cbd5e0;
-            --gray-600: #718096;
-            --gray-700: #4a5568;
-            --gray-800: #2d3748;
-            --white: #ffffff;
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -33,696 +13,415 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            color: var(--gray-800);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
         .container {
-            max-width: 3000px;
-            margin: 0 auto;
-            padding: 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
         }
 
-        .header {
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
             text-align: center;
-            margin-bottom: 30px;
-            color: var(--white);
+            font-size: 2em;
         }
 
-        .header h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .stats-panel {
-            background: var(--white);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        .stats-panel h3 {
+        .form-group {
             margin-bottom: 20px;
-            color: var(--gray-800);
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .stat-item:last-child {
-            border-bottom: none;
-        }
-
-        .stat-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
             font-weight: 500;
         }
 
-        .stat-value {
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-
-        .main-panel {
-            background: var(--white);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .controls {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-
-        .input-group {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .form-control {
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid var(--gray-300);
+            padding: 12px;
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: var(--white);
+            font-size: 16px;
+            transition: border-color 0.3s;
         }
 
-        .form-control:focus {
+        input:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
         }
 
-        .btn {
-            padding: 12px 20px;
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             border: none;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            background: var(--primary);
-            color: var(--white);
+            transition: transform 0.2s;
         }
 
-        .btn:hover {
+        button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        button:active {
+            transform: translateY(0);
         }
 
-        .btn-success {
-            background: var(--success);
+        .secondary-btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            margin-top: 10px;
         }
 
-        .btn-danger {
-            background: var(--danger);
-        }
-
-        .btn-secondary {
-            background: var(--gray-600);
-        }
-
-        .filters {
+        .task-input-group {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
-            flex-wrap: wrap;
         }
 
-        .filter-btn {
-            padding: 8px 16px;
-            border: 2px solid var(--gray-300);
-            background: var(--white);
-            color: var(--gray-700);
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .task-input-group input {
+            flex: 1;
         }
 
-        .filter-btn.active {
-            background: var(--primary);
-            color: var(--white);
-            border-color: var(--primary);
+        .task-input-group button {
+            width: auto;
+            padding: 12px 24px;
         }
 
-        .tasks-container {
-            max-height: 600px;
-            overflow-y: auto;
+        .tasks-list {
+            margin-top: 20px;
         }
 
         .task-item {
-            background: var(--gray-100);
-            border: 1px solid var(--gray-200);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-            animation: slideIn 0.3s ease;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
         }
 
         .task-item:hover {
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
+            transform: translateX(5px);
         }
 
         .task-item.completed {
-            opacity: 0.7;
-            background: var(--gray-200);
-        }
-
-        .task-header {
-            display: flex;
-            justify-content: between;
-            align-items: flex-start;
-            margin-bottom: 10px;
-        }
-
-        .task-title {
-            flex: 1;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--gray-800);
-            margin-right: 15px;
-        }
-
-        .task-item.completed .task-title {
+            opacity: 0.6;
             text-decoration: line-through;
-            color: var(--gray-600);
+        }
+
+        .task-text {
+            flex: 1;
+            color: #333;
         }
 
         .task-actions {
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
 
-        .task-meta {
+        .task-actions button {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+        }
+
+        .complete-btn {
+            background: #27ae60;
+        }
+
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.9rem;
-            color: var(--gray-600);
+            margin-bottom: 30px;
         }
 
-        .priority {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.8rem;
+        .user-info {
+            color: #667eea;
             font-weight: 600;
-            text-transform: uppercase;
         }
 
-        .priority-alta {
-            background: var(--danger);
-            color: var(--white);
+        .logout-btn {
+            width: auto;
+            padding: 8px 20px;
+            font-size: 14px;
+            background: #e74c3c;
         }
 
-        .priority-media {
-            background: var(--warning);
-            color: var(--white);
+        .hidden {
+            display: none;
         }
 
-        .priority-baja {
-            background: var(--success);
-            color: var(--white);
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .success {
+            color: #27ae60;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
         }
 
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
-            color: var(--gray-600);
-        }
-
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--gray-600);
-        }
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 8px;
-            color: var(--white);
-            font-weight: 600;
-            z-index: 1000;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.success {
-            background: var(--success);
-        }
-
-        .notification.error {
-            background: var(--danger);
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-            
-            .controls {
-                flex-direction: column;
-            }
-            
-            .filters {
-                justify-content: center;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
+            color: #999;
+            padding: 40px 20px;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header class="header">
-            <h1><i class="fas fa-tasks"></i> TaskMaster Pro</h1>
-            <p>Gestiona tus tareas de manera eficiente y profesional</p>
-        </header>
+        <!-- Pantalla de Login -->
+        <div id="loginScreen">
+            <h1>🔐 Iniciar Sesión</h1>
+            <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" placeholder="tu@email.com">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Contraseña</label>
+                <input type="password" id="loginPassword" placeholder="••••••••">
+            </div>
+            <button onclick="login()">Iniciar Sesión</button>
+            <button class="secondary-btn" onclick="showRegister()">Crear Cuenta</button>
+            <div id="loginError" class="error"></div>
+        </div>
 
-        <div class="dashboard">
-            <div class="stats-panel">
-                <h3><i class="fas fa-chart-pie"></i> Estadísticas</h3>
-                <div id="stats">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        Aqui veras tus estadísticas...
-                    </div>
+        <!-- Pantalla de Registro -->
+        <div id="registerScreen" class="hidden">
+            <h1>📝 Crear Cuenta</h1>
+            <div class="form-group">
+                <label for="registerName">Nombre</label>
+                <input type="text" id="registerName" placeholder="Tu nombre">
+            </div>
+            <div class="form-group">
+                <label for="registerEmail">Email</label>
+                <input type="email" id="registerEmail" placeholder="tu@email.com">
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">Contraseña</label>
+                <input type="password" id="registerPassword" placeholder="••••••••">
+            </div>
+            <button onclick="register()">Registrarse</button>
+            <button class="secondary-btn" onclick="showLogin()">Ya tengo cuenta</button>
+            <div id="registerError" class="error"></div>
+            <div id="registerSuccess" class="success"></div>
+        </div>
+
+        <!-- Pantalla de Tareas -->
+        <div id="tasksScreen" class="hidden">
+            <div class="header">
+                <div>
+                    <h1>✅ Mis Tareas</h1>
+                    <div class="user-info" id="userInfo"></div>
                 </div>
+                <button class="logout-btn" onclick="logout()">Salir</button>
             </div>
 
-            <div class="main-panel">
-                <div class="controls">
-                    <div class="input-group">
-                        <input type="text" id="taskInput" class="form-control" placeholder="¿Qué necesitas hacer?" maxlength="200">
-                    </div>
-                    <select id="prioritySelect" class="form-control" style="flex: none; width: 120px;">
-                        <option value="baja">Baja</option>
-                        <option value="media" selected>Media</option>
-                        <option value="alta">Alta</option>
-                    </select>
-                    <button id="addTaskBtn" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Agregar
-                    </button>
-                </div>
-
-                <div class="controls">
-                    <div class="input-group">
-                        <input type="text" id="searchInput" class="form-control" placeholder="Buscar tareas...">
-                    </div>
-                </div>
-
-                <div class="filters">
-                    <button class="filter-btn active" data-filter="todas">
-                        <i class="fas fa-list"></i> Todas
-                    </button>
-                    <button class="filter-btn" data-filter="pendientes">
-                        <i class="fas fa-clock"></i> Pendientes
-                    </button>
-                    <button class="filter-btn" data-filter="completadas">
-                        <i class="fas fa-check"></i> Completadas
-                    </button>
-                    <button class="filter-btn" data-filter="alta">
-                        <i class="fas fa-exclamation-triangle"></i> Alta Prioridad
-                    </button>
-                </div>
-
-                <div id="tasksContainer" class="tasks-container">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        Aqui veras tus tareas...
-                    </div>
-                </div>
+            <div class="task-input-group">
+                <input type="text" id="taskInput" placeholder="Nueva tarea..." onkeypress="if(event.key==='Enter') addTask()">
+                <button onclick="addTask()">Agregar</button>
             </div>
+
+            <div class="tasks-list" id="tasksList"></div>
         </div>
     </div>
 
     <script>
-        class TaskManager {
-            constructor() {
-                this.tasks = [];
-                this.currentFilter = 'todas';
-                this.searchTerm = '';
-                this.init();
+        // Simulación de base de datos en memoria
+        let users = {};
+        let currentUser = null;
+        let tasks = {};
+
+        // Cargar datos del almacenamiento local
+        function loadData() {
+            const savedUsers = localStorage.getItem('users');
+            const savedTasks = localStorage.getItem('tasks');
+            if (savedUsers) users = JSON.parse(savedUsers);
+            if (savedTasks) tasks = JSON.parse(savedTasks);
+        }
+
+        // Guardar datos en almacenamiento local
+        function saveData() {
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        // Inicializar aplicación
+        loadData();
+
+        function showLogin() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('registerScreen').classList.add('hidden');
+            document.getElementById('tasksScreen').classList.add('hidden');
+            clearErrors();
+        }
+
+        function showRegister() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('registerScreen').classList.remove('hidden');
+            document.getElementById('tasksScreen').classList.add('hidden');
+            clearErrors();
+        }
+
+        function showTasks() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('registerScreen').classList.add('hidden');
+            document.getElementById('tasksScreen').classList.remove('hidden');
+            document.getElementById('userInfo').textContent = `Hola, ${currentUser.name}`;
+            renderTasks();
+        }
+
+        function clearErrors() {
+            document.getElementById('loginError').textContent = '';
+            document.getElementById('registerError').textContent = '';
+            document.getElementById('registerSuccess').textContent = '';
+        }
+
+        function register() {
+            const name = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim().toLowerCase();
+            const password = document.getElementById('registerPassword').value;
+
+            if (!name || !email || !password) {
+                document.getElementById('registerError').textContent = 'Todos los campos son obligatorios';
+                return;
             }
 
-            async init() {
-                this.bindEvents();
-                await this.loadTasks();
-                await this.loadStats();
+            if (users[email]) {
+                document.getElementById('registerError').textContent = 'Este email ya está registrado';
+                return;
             }
 
-            bindEvents() {
-                // Agregar tarea
-                document.getElementById('addTaskBtn').addEventListener('click', () => this.addTask());
-                document.getElementById('taskInput').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') this.addTask();
-                });
+            users[email] = { name, password };
+            tasks[email] = [];
+            saveData();
 
-                // Filtros
-                document.querySelectorAll('.filter-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        this.currentFilter = btn.dataset.filter;
-                        this.renderTasks();
-                    });
-                });
+            document.getElementById('registerSuccess').textContent = '¡Cuenta creada! Redirigiendo...';
+            document.getElementById('registerError').textContent = '';
+            
+            setTimeout(() => {
+                document.getElementById('registerName').value = '';
+                document.getElementById('registerEmail').value = '';
+                document.getElementById('registerPassword').value = '';
+                showLogin();
+            }, 1500);
+        }
 
-                // Búsqueda
-                document.getElementById('searchInput').addEventListener('input', (e) => {
-                    this.searchTerm = e.target.value.toLowerCase();
-                    this.renderTasks();
-                });
+        function login() {
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                document.getElementById('loginError').textContent = 'Por favor completa todos los campos';
+                return;
             }
 
-            async makeRequest(url, options = {}) {
-                try {
-                    const response = await fetch(`http://localhost:5000${url}`, {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            ...options.headers
-                        },
-                        ...options
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    
-                    return await response.json();
-                } catch (error) {
-                    console.error('Request failed:', error);
-                    this.showNotification('Error de conexión con el servidor', 'error');
-                    throw error;
-                }
+            if (!users[email] || users[email].password !== password) {
+                document.getElementById('loginError').textContent = 'Email o contraseña incorrectos';
+                return;
             }
 
-            async loadTasks() {
-                try {
-                    this.tasks = await this.makeRequest('/api/tareas');
-                    this.renderTasks();
-                } catch (error) {
-                    document.getElementById('tasksContainer').innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <h3>Error al cargar las tareas</h3>
-                            <p>Verifica que el servidor esté ejecutándose</p>
-                        </div>
-                    `;
-                }
+            currentUser = { email, name: users[email].name };
+            showTasks();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            showLogin();
+        }
+
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const taskText = taskInput.value.trim();
+
+            if (!taskText) return;
+
+            if (!tasks[currentUser.email]) {
+                tasks[currentUser.email] = [];
             }
 
-            async loadStats() {
-                try {
-                    const stats = await this.makeRequest('/api/estadisticas');
-                    this.renderStats(stats);
-                } catch (error) {
-                    document.getElementById('stats').innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <p>Error al cargar estadísticas</p>
-                        </div>
-                    `;
-                }
-            }
+            tasks[currentUser.email].push({
+                id: Date.now(),
+                text: taskText,
+                completed: false
+            });
 
-            renderStats(stats) {
-                document.getElementById('stats').innerHTML = `
-                    <div class="stat-item">
-                        <div class="stat-label">
-                            <i class="fas fa-list" style="color: var(--primary);"></i>
-                            Total de tareas
-                        </div>
-                        <div class="stat-value">${stats.total}</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">
-                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
-                            Completadas
-                        </div>
-                        <div class="stat-value">${stats.completadas}</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">
-                            <i class="fas fa-clock" style="color: var(--warning);"></i>
-                            Pendientes
-                        </div>
-                        <div class="stat-value">${stats.pendientes}</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">
-                            <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
-                            Alta prioridad
-                        </div>
-                        <div class="stat-value">${stats.prioridades.alta}</div>
-                    </div>
-                `;
-            }
+            saveData();
+            taskInput.value = '';
+            renderTasks();
+        }
 
-            renderTasks() {
-                const filteredTasks = this.filterTasks();
-                const container = document.getElementById('tasksContainer');
-
-                if (filteredTasks.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-inbox"></i>
-                            <h3>No hay tareas</h3>
-                            <p>${this.searchTerm ? 'No se encontraron tareas con ese criterio' : 'Agrega tu primera tarea para comenzar'}</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                container.innerHTML = filteredTasks.map(task => `
-                    <div class="task-item ${task.completada ? 'completed' : ''}">
-                        <div class="task-header">
-                            <div class="task-title">${this.escapeHtml(task.descripcion)}</div>
-                            <div class="task-actions">
-                                ${!task.completada ? `
-                                    <button class="btn btn-success" onclick="taskManager.completeTask(${task.id})" title="Completar tarea">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                ` : ''}
-                                <button class="btn btn-danger" onclick="taskManager.deleteTask(${task.id})" title="Eliminar tarea">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="task-meta">
-                            <div>
-                                <span class="priority priority-${task.prioridad}">${task.prioridad}</span>
-                                <span style="margin-left: 10px;">
-                                    <i class="fas fa-calendar"></i> ${this.formatDate(task.fecha_creacion)}
-                                </span>
-                                ${task.fecha_completacion ? `
-                                    <span style="margin-left: 10px;">
-                                        <i class="fas fa-check-circle"></i> ${this.formatDate(task.fecha_completacion)}
-                                    </span>
-                                ` : ''}
-                            </div>
-                            <div>ID: ${task.id}</div>
-                        </div>
-                    </div>
-                 `).join('');
-            }
-
-            filterTasks() {
-                let filtered = this.tasks;
-
-                // Filtro por estado/prioridad
-                switch (this.currentFilter) {
-                    case 'pendientes':
-                        filtered = filtered.filter(task => !task.completada);
-                        break;
-                    case 'completadas':
-                        filtered = filtered.filter(task => task.completada);
-                        break;
-                    case 'alta':
-                        filtered = filtered.filter(task => task.prioridad === 'alta' && !task.completada);
-                        break;
-                }
-
-                // Filtro por búsqueda
-                if (this.searchTerm) {
-                    filtered = filtered.filter(task => 
-                        task.descripcion.toLowerCase().includes(this.searchTerm)
-                    );
-                }
-
-                // Ordenar por prioridad y fecha
-                return filtered.sort((a, b) => {
-                    const priorityOrder = { 'alta': 3, 'media': 2, 'baja': 1 };
-                    if (a.completada !== b.completada) {
-                        return a.completada - b.completada;
-                    }
-                    if (priorityOrder[a.prioridad] !== priorityOrder[b.prioridad]) {
-                        return priorityOrder[b.prioridad] - priorityOrder[a.prioridad];
-                    }
-                    return new Date(b.fecha_creacion) - new Date(a.fecha_creacion);
-                });
-            }
-
-            async addTask() {
-                const input = document.getElementById('taskInput');
-                const priority = document.getElementById('prioritySelect').value;
-                const description = input.value.trim();
-
-                if (!description) {
-                    this.showNotification('Por favor ingresa una descripción para la tarea', 'error');
-                    return;
-                }
-
-                try {
-                    await this.makeRequest('/api/tareas', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            descripcion: description,
-                            prioridad: priority
-                        })
-                    });
-
-                    input.value = '';
-                    this.showNotification('Tarea agregada correctamente', 'success');
-                    await this.loadTasks();
-                    await this.loadStats();
-                } catch (error) {
-                    this.showNotification('Error al agregar la tarea', 'error');
-                }
-            }
-
-            async completeTask(id) {
-                try {
-                    await this.makeRequest(`/api/tareas/${id}`, {
-                        method: 'PUT'
-                    });
-                    
-                    this.showNotification('Tarea completada', 'success');
-                    await this.loadTasks();
-                    await this.loadStats();
-                } catch (error) {
-                    this.showNotification('Error al completar la tarea', 'error');
-                }
-            }
-
-            async deleteTask(id) {
-                if (!confirm('¿Estás seguro de que deseas eliminar esta tarea?')) {
-                    return;
-                }
-
-                try {
-                    await this.makeRequest(`/api/tareas/${id}`, {
-                        method: 'DELETE'
-                    });
-                    
-                    this.showNotification('Tarea eliminada', 'success');
-                    await this.loadTasks();
-                    await this.loadStats();
-                } catch (error) {
-                    this.showNotification('Error al eliminar la tarea', 'error');
-                }
-            }
-
-            showNotification(message, type = 'success') {
-                const notification = document.createElement('div');
-                notification.className = `notification ${type}`;
-                notification.innerHTML = `
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                    ${message}
-                `;
-                
-                document.body.appendChild(notification);
-                
-                setTimeout(() => notification.classList.add('show'), 100);
-                
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                    setTimeout(() => document.body.removeChild(notification), 300);
-                }, 3000);
-            }
-
-            escapeHtml(text) {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
-            formatDate(dateString) {
-                const date = new Date(dateString);
-                return date.toLocaleDateString('es-ES', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
+        function toggleTask(id) {
+            const userTasks = tasks[currentUser.email];
+            const task = userTasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                saveData();
+                renderTasks();
             }
         }
 
-        // Inicializar la aplicación
-        const taskManager = new TaskManager();
+        function deleteTask(id) {
+            tasks[currentUser.email] = tasks[currentUser.email].filter(t => t.id !== id);
+            saveData();
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const tasksList = document.getElementById('tasksList');
+            const userTasks = tasks[currentUser.email] || [];
+
+            if (userTasks.length === 0) {
+                tasksList.innerHTML = '<div class="empty-state">No tienes tareas. ¡Agrega una para comenzar!</div>';
+                return;
+            }
+
+            tasksList.innerHTML = userTasks.map(task => `
+                <div class="task-item ${task.completed ? 'completed' : ''}">
+                    <div class="task-text">${task.text}</div>
+                    <div class="task-actions">
+                        <button class="complete-btn" onclick="toggleTask(${task.id})">
+                            ${task.completed ? '↩️' : '✓'}
+                        </button>
+                        <button class="delete-btn" onclick="deleteTask(${task.id})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
